@@ -54,7 +54,7 @@ border 1px solid: #000;
 				{% else %}
 
 					{% for ingre in ingredients:%}
-						<input type="checkbox" name="foodstuffs" value="{{ingre['ingreID']}}"> {{ ingre['name'] }} {{ingre['quantity']}}<br>
+						<input type="checkbox" name="foodstuffs" value="{{ingre['name']}}"> {{ ingre['name'] }} {{ingre['quantity']}}<br>
 					{% endfor %}
 				{% endif %}
 
@@ -80,7 +80,7 @@ border 1px solid: #000;
 				<br>
 				<br>
 				<br>
-				<button type="button" class="btn btn-light" type="submit">검색!</button>
+				<button type="submit" class="btn btn-light" >검색!</button>
 			</div>
 		</form> 
 	</body>

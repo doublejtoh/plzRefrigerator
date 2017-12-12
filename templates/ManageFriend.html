@@ -39,22 +39,69 @@
     </head>
 	<body>
 			<div style="margin:30px;"><h1 style="color:orange">친구 추가</h1><br>
-	<div style=" width:33%; float:left;"><input class="form-control mr-sm-2" type="text" placeholder="친구 추가(이름을 입력하세요)" aria-label="Search"  style="width:220px; text-align:left"><br></div><div style="width:33%;float:left;"><button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button></div><div style=" width:33%; float:right;"><button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구 목록 보기</button><br><button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구 추천 레시피 보기</button></div></div>
+
+                    <form method="POST" action="/Friends/Search">
+                        <div style=" width:33%; float:left;">
+                            <input class="form-control mr-sm-2" name="friendID" type="text" placeholder="친구 추가(ID를 입력하세요)" aria-label="Search"  style="width:220px; text-align:left"><br>
+                        </div>
+                        <div style="width:33%;float:left;">
+                            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                        </div>
+                    </form>
+                </div>
     <br>
     <div style="margin-left:30px">
     <h2 style="color:orange"> 친구 목록</h2><br>
-    <img src="https://image.flaticon.com/icons/svg/181/181549.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구에게 내 레시피 추천</button>	&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구 삭제</button>	<br><br><p1>&nbsp 친구 1</p1><br><br>
-        <img src="https://image.flaticon.com/icons/svg/181/181549.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구에게 내 레시피 추천</button>	&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구 삭제</button>	<br><br><p1>&nbsp 친구 2</p1><br><br>
-            <img src="https://image.flaticon.com/icons/svg/181/181549.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구에게 내 레시피 추천</button>	&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구 삭제</button>	<br><br><p1>&nbsp 친구 3</p1><br><br>
-                <img src="https://image.flaticon.com/icons/svg/181/181549.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구에게 내 레시피 추천</button>	&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구 삭제</button>	<br><br><p1>&nbsp 친구 4</p1><br><br>
+
+        {% for friend in friend_lists: %}
+            {% if friend['customer1ID'] == current_user.getCustomerID() %}
+                <img src="https://image.flaticon.com/icons/svg/181/181549.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+
+            <form action="/FriendsDelete" method="POST">
+                <input type="hidden" name="friendID" value="{{friend['customer2ID']}}">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구 삭제</button>	<br><br><p1>&nbsp {{friend['customer2ID']}}</p1><br><br>
+            </form>
+            {% elif friend['customer2ID'] == current_user.getCustomerID() %}
+                <img src="https://image.flaticon.com/icons/svg/181/181549.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+
+            <form action="/FriendsDelete" method="POST">
+                <input type="hidden" name="friendID" value="{{friend['customer1ID']}}">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구 삭제</button>	<br><br><p1>&nbsp {{friend['customer1ID']}}</p1><br><br>
+            </form>
+            {% endif %}
+        {% endfor %}
     </div>
     <div style="margin-left:30px">
-    <h2 style="color:orange"> 친구 신청 목록</h2><br>
-    <img src="https://image.flaticon.com/icons/svg/181/181549.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <button class="btn btn-outline-success my-2 my-sm-0" type="submit">승인 대기중</button>	<br><br><p1>&nbsp 친구 1</p1><br><br>
+    <h2 style="color:orange"> 친구 신청 보낸 목록</h2><br>
+    {% for request in request_lists %}
+        <img src="https://image.flaticon.com/icons/svg/181/181549.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+        {% if request['status'] == 0: %}
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">거절됨</button>
+        {% elif request['status'] == 1: %}
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">승인됨</button>
+        {% else %}
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">승인 대기중</button>
+        {% endif %}
+        <br><br><p1>&nbsp {{request['customer2ID']}}</p1><br><br><br><br>
+        {% endfor %}
     </div>
     <div style="margin-left:30px">
-    <h3 style="color:orange"> 친구 신청 발신 목록</h3><br>
-    <img src="https://image.flaticon.com/icons/svg/181/181546.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <button class="btn btn-outline-success my-2 my-sm-0" type="submit">승인</button>	&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<button class="btn btn-outline-success my-2 my-sm-0" type="submit">거절</button><br><br><p1>&nbsp 친구 1</p1><br><br>
+
+    <h3 style="color:orange"> 친구 신청 받은 목록</h3><br>
+        {% for requested in requested_lists %}
+    <img src="https://image.flaticon.com/icons/svg/181/181546.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+        <form method="POST" action="/FriendsGrant">
+            <input type="hidden" name="friendID" value="{{requested['customer1ID']}}">
+            <button type="submit">승인</button>
+        </form>
+        &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+        <form method="POST" action="/FriendsReject">
+            <input type="hidden" name="friendID" value="{{requested['customer1ID']}}">
+            <button  type="submit">거절</button>
+        </form>
+
+        <br><br><p1>&nbsp {{requested['customer1ID']}}</p1><br><br>
+        {% endfor %}
     </div>
 
     </body>

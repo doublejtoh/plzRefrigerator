@@ -162,10 +162,11 @@ def showIngre():
         return render_template('login.html')  # redirect to index(login page).
     else:  # 로그인이 되어 있을 경우
         con = mysql.connect()
-        cur = con.cursor()
+        cur = con.cursor(pymysql.cursors.DictCursor)
         cur.execute("SELECT ingreID,refrigID,quantity,name from refriingre where refrigID = (%s)",(current_user.getrefrigID()))
         rows = cur.fetchall()
-        return render_template('showIngre.html',ingredients=rows)
+        con.close()
+        return render_template('ManageFridge.html',ingredients=rows)
 
 @app.route('/addIngre',methods=['POST','GET']) # 재료 추가
 def addIngre():
@@ -188,7 +189,7 @@ def addIngre():
             cur.execute("INSERT INTO Refriingre(refrigID,quantity,name) VALUES (%s,%s,%s)",(current_user.getrefrigID(),ingre_quantity,ingre_name))
             con.commit()
             con.close()
-            return render_template('showIngre.html')
+            return redirect(url_for('showIngre'))
         else:# 재료이름이 중복되면, 재료 추가 불가#.
             con.commit()
             con.close()
@@ -204,9 +205,9 @@ def deleteIngre():
         con = mysql.connect()
         cur = con.cursor()
         cur.execute("delete from refriingre where ingreID = (%s)",(ingre_id))
-        cur.commit()
+        con.commit()
         con.close()
-        return render_template('showIngre.html')
+        return redirect(url_for('showIngre'))
 
 
 '''
@@ -216,7 +217,7 @@ def deleteIngre():
 
 
 @app.route('/Friends/Index') # 친구관리 index페이지
-def freindIdx():
+def friendIdx():
     global current_user
     if (current_user==None):
         return render_template('login.html')
@@ -225,29 +226,43 @@ def freindIdx():
             친구 목록
         '''
         con = mysql.connect()
-        cur = con.cursor()
-        cur.execute("SELECT CUSTOMER1ID,CUSTOMER2ID from friend where (CUSTOMER1ID like (%s) or CUSTOMER2ID like (%s)) and status = 1 ",(current_user.getCustomerID(),(current_user.getCustomerID())))
+        cur = con.cursor(pymysql.cursors.DictCursor)
+        cur.execute("SELECT customer1ID,customer2ID from friend where (customer1ID like (%s) or customer2ID like (%s)) and status = 1 ",(current_user.getCustomerID(),current_user.getCustomerID()))
         friend_lists = cur.fetchall()
 
         '''
             친구 신청한 목록
         '''
-        cur.execute("SELECT CUSTOMER2ID from friend where CUSTOMER1ID like (%s) and status = 2 ",(current_user.getCustomerID())) # customer1ID에는 신청자, custome2ID에는 신청받은 사람. status가 2이면 승인 대기중.
+        cur.execute("SELECT customer2ID,status from friend where customer1ID like (%s) ",(current_user.getCustomerID())) # customer1ID에는 신청자, custome2ID에는 신청받은 사람. status가 2이면 승인 대기중,status가 0이면 거절됨.
         request_lists = cur.fetchall()
 
 
         '''
             친구 신청 받은 목록
         '''
-        cur.execute("SELECT CUSTOMER1ID from friend where CUSTOMER2ID like (%s) and status = 2 ",(current_user.getCustomerID()))
+        cur.execute("SELECT customer1ID from friend where customer2ID like (%s) and status = 2 ",(current_user.getCustomerID()))
         requested_lists = cur.fetchall()
 
         con.close()
 
-        return render_template('ManageFriend.html',friend_lists=friend_lists,request_lists=request_lists,requested_lists=requested_lists)
+        return render_template('ManageFriend.html',friend_lists=friend_lists,request_lists=request_lists,requested_lists=requested_lists,current_user=current_user)
 
+@app.route('/Friends/Search',methods=['POST'])
+def SearchFriend():
+    global current_user
+    if (current_user == None):
+        return render_template('login.html')
+    else:
+        friendID = request.form['friendID']
+        con = mysql.connect()
+        cur = con.cursor(pymysql.cursors.DictCursor)
+        cur.execute('SELECT customerID,name from Customer where customerID like (%s)',(friendID))
+        datas = cur.fetchall()
 
-
+        if datas.__len__()==0:  # 회원 목록중에 없으면
+            return render_template('SearchFriend.html',customer=None)
+        else: # 회원 목록중에 있으면
+            return render_template('SearchFriend.html',customer=datas)
 @app.route('/FriendsAddReq',methods=['POST']) #친구 추가 요청
 def FriendsAddReq():
     global current_user
@@ -256,12 +271,21 @@ def FriendsAddReq():
     else:
 
         customer2ID = request.form['friendID'] #   버튼으로 부터 값이 넘겨와짐
-        con = mysql.connect()
-        cur = con.cursor()
-        cur.execute("INSERT INTO friend(customer1ID,customer2ID,status) values(%s,%s,%s)",(current_user.getCustomerID(),customer2ID,2))  # customer1ID에는 친구 신청자 ID가 들어가고 customer2ID에는 친구의 ID가 들어간다.
-        con.commit()
-        con.close()
-        return render_template('friend_index.html')
+        if (current_user.getCustomerID()==customer2ID): # 내 자신에게 친구 신청하려는 경우
+            return "내 자신에게 친구 신청할 수 없습니다."
+        else:
+            con = mysql.connect()
+            cur = con.cursor(pymysql.cursors.DictCursor)
+            cur.execute("SELECT * from friend where (customer1ID in (%s,%s) or customer2ID in (%s,%s)) and status = 1",(current_user.getCustomerID(),customer2ID,current_user.getCustomerID(),customer2ID)) # 이미 친구로 등록되어있는데, 친구 신청 요청자와 받은자가 달라질 뿐 인데 친구 신청했을 경우에 대한 예외 처리
+            datas = cur.fetchall()
+            if datas.__len__()==0:
+                cur.execute("INSERT INTO friend(customer1ID,customer2ID,status) values(%s,%s,%s)",(current_user.getCustomerID(),customer2ID,2))  # customer1ID에는 친구 신청자 ID가 들어가고 customer2ID에는 친구의 ID가 들어간다.
+                con.commit()
+                con.close()
+                return redirect(url_for('friendIdx'))
+            else: # 이미 친구로 등록되어있는데 , 신청자 받는자 아이디만 바꿔서 신청하는 경우
+                return '이미 친구로 등록되어있습니다.'
+
 
 
 
@@ -277,10 +301,10 @@ def FriendsDelete():
         friendID = request.form['friendID']
         con = mysql.connect()
         cur = con.cursor()
-        cur.execute("DELETE from friend where (CUSTOMER1ID like (%s) or CUSTOMER2ID like (%s)) and status = 1 ",(friendID,friendID))
+        cur.execute("DELETE from friend where (customer1ID in (%s,%s) or customer2ID in (%s,%s)) and status = 1 ",(current_user.getCustomerID(),friendID,current_user.getCustomerID(),friendID))
         con.commit()
         con.close()
-        return render_template('friend_index.html')
+        return redirect(url_for('friendIdx'))
 
 
 
@@ -298,7 +322,7 @@ def FriendsGrant():
         con.commit()
         con.close()
 
-        return render_template('friend_index.html')
+        return redirect(url_for('friendIdx'))
 
 @app.route('/FriendsReject',methods=['POST']) # 친구 요청 거부
 def FriendsReject():
@@ -309,10 +333,10 @@ def FriendsReject():
         friendID = request.form['friendID'] #   버튼으로 부터 값이 넘겨와짐
         con = mysql.connect()
         cur = con.cursor()
-        cur.execute("UPDATE friend SET status = 1 where customer1ID like (%s) and customer2ID like (%s) ",(friendID,current_user.getCustomerID()))
+        cur.execute("UPDATE friend SET status = 0 where customer1ID like (%s) and customer2ID like (%s) ",(friendID,current_user.getCustomerID()))
         con.commit()
         con.close()
-        return render_template('freind_index.html')
+        return redirect(url_for('friendIdx'))
 
 
 '''
@@ -342,8 +366,8 @@ def SearchRecipe():
     if (current_user == None): #로그인이 안되어있으면 login 페이지로 이동.
         return render_template('login.html')
     else: # 로그인이 되어있으면 search가능
-        foodstuffs = request.form['foodstuffs']
-        foodstype = request.form['foodstype']
+        foodstuffs = request.form.getlist('foodstuffs')
+        foodstype = request.form['foodsType']
 
         ################################################## 페이지별 url, 제목 , 이미지 크롤링 ########################################
         url = []
@@ -353,7 +377,7 @@ def SearchRecipe():
         if foodstype == 0:  # 전체 선택 눌렀을 경우
             url.append('http://www.10000recipe.com/recipe/list.html?q=' + "+".join(foodstuffs) + '&cat4=&page=')
         else:
-            url.append('http://www.10000recipe.com/recipe/list.html?q=' + "+".join(foodstuffs) + '&cat4='+str(foodstype)+'&page=')
+            url.append('http://www.10000recipe.com/recipe/list.html?q=' + '+'.join(foodstuffs) + '&cat4='+str(foodstype)+'&page=')
 
 
         received = requests.get(url[0])
@@ -394,9 +418,65 @@ def SearchRecipe():
                     ahref.append(temp_ahref)
                     image.append(re.findall(r'<img src="(.+?)" style="width:275px; height:275px;">', text))
                     i = i + 1
+            
+            return render_template('ViewRecipe.html',title=title,ahref=ahref,image=image)
 
+'''
+상세 레시피 정보 보기
+'''
 
+@app.route('/recipe/<int:recipenum>')
+def showRecipeDetail(recipenum):
 
+    global current_user
+    if (current_user == None):
+        return render_template('login.html')
+    else:
+
+        detail_url = 'http://www.10000recipe.com/recipe/'+str(recipenum)
+        detail_received = requests.get(detail_url)
+        detail_text = detail_received.content
+        detail_text = detail_text.decode('utf-8')
+        all_ingredient = re.findall(r'<div class="ready_ingre3" id="divConfirmedMaterialArea">(.+?)</div>', detail_text,
+                                    re.DOTALL)
+        # 제목
+        title_html = re.findall(r'<div class="view2_summary">(.+?)</div>', detail_text, re.DOTALL)
+        stripped_title_html = title_html[0].strip()
+        detail_title = re.findall(r'<h3>(.+?)</h3>', stripped_title_html, re.DOTALL)
+
+        # 이미지
+        detail_image = re.findall(r'<img id="main_thumbs" src="(.+?)" alt="main thumb">', detail_text, re.DOTALL)
+
+        # print(detail_title, detail_image)
+        if (all_ingredient.__len__() == 0):  # 재료를 format에 맞춰 쓰지 않은 게시물인 경우
+            print(detail_url + " 을 통해 상세 재료 정보 혹은 조리 순서를 확인하세요.")
+        else:  # 재료를 format에 맞춰 쓴 게시물 인경우
+
+            ingredients_html = all_ingredient[0].strip()  # 재료관련 부분 크롤링하기 위한 부분 html . * ingredient = ingredient[0].strip 하면 \r \n 같은거 제거 안되네.
+
+            ingredients = re.findall(r'<li>(.+?)                                                ', ingredients_html,
+                                     re.DOTALL)
+            #print(ingredients)
+            # 재료 양 for format 맞춰서 쓴 애들
+            quantity = re.findall(r'<span class="ingre_unit">(.*?)</span>', ingredients_html, re.DOTALL)  # 재료의 양
+            # ingredient_quantity= quantity[4].strip()
+            #print(quantity)
+
+            all_orders = re.findall(r'<div id="stepdescr(.+?)" class="media-body">(.+?)</div>', detail_text,
+                                    re.DOTALL)  # plus_tip 없는 조리 순서
+            if all_orders.__len__() == 0:  # 조리 순서를 포맷에 맞지 않게 쓴 게시물인 경우
+                print(detail_url + " 을 통해 상세 조리 순서를 확인하세요.")
+            else:
+                cook_orders = []
+                for order in all_orders:  # 조리 순서를 포맷에 맞게 쓴 게시물 인경우
+                    cook_order_num, cook_order = order
+                    cleantext1 = cook_order.replace('<p class="step_add add_tip2">', " * 이 단계에서의 팁: ")
+                    cleantext2 = cleantext1.replace('</p>', "")
+                    cleantext3 = cleantext2.replace('<br />', "")
+                    cleantext4 = cleantext3.replace('<p class="step_add add_tool">', " * 필요한 도구: ")
+                    cleantext5 = cleantext4.replace('<p class="step_add add_material">', " * 필요한 재료: ")
+                    cook_orders.append(cleantext5)
+            return render_template('ViewDetailRecipe.html',detail_title=detail_title,detail_image=detail_image,detail_url=detail_url,ingredients=ingredients,quantity=quantity,cook_orders=cook_orders,recipenum=recipenum)
 
 '''
 레시피 저장
@@ -408,16 +488,53 @@ def SaveRecipe():
     if (current_user ==None):
         return render_template('login.html')
     else:
-        recipeID = request.form['recipeID']
+
+        title = request.form['title']
+        imageUrl = request.form['imageUrl']
+        url = request.form['url']
+
         con = mysql.connect()
-        cur = con.cursor()
-        cur.execute('INSERT INTO RecipeList(recipeID,customerID) values(%s,%s)',(recipeID,current_user.getCustomerID()))
+        cur = con.cursor(pymysql.cursors.DictCursor)
+        cur.execute('INSERT INTO Recipe(title,imageUrl,url) values(%s,%s,%s)',(title,imageUrl,url))# 레시피 생성
+
+        cur.execute("SELECT * from Recipe order by recipeID desc limit 1")
+
+        last_recipe = cur.fetchall()
+        for r in last_recipe:
+            maxRecipeID = r['recipeID']
+
+        cur.execute('INSERT INTO RecipeList(recipeID,customerID) values(%s,%s)',(maxRecipeID,current_user.getCustomerID())) # 현재 로그인한 사용자의 RecipeList에 추가
         con.commit()
         con.close()
         return redirect(url_for('ShowMyRecipe'))
 
+
+
 '''
-, 레시피 친구에게 추천
+내 레시피중 추천할 레시피 고르기
+
+'''
+
+'''
+@app.route('/selectForRecommend/Myrecipe')
+def selectRecipe(friendID):
+    global current_user
+    if (current_user == None):
+        return render_template('login.html')
+
+    else:
+        con = mysql.connect()
+        cur = con.cursor(pymysql.cursors.DictCursor)
+        cur.execute('SELECT R.title,R.imageUrl,R.kind,R.url from RecipeList AS RL join Recipe R on RL.recipeID = R.recipeID where RL.customerID like (%s)',(current_user.getCustomerID()))
+        MyRecipes = cur.fetchall()
+        con.close()
+
+
+        return render_template('selectMyRecipe.html',MyRecipes=MyRecipes,friendID=friendID)
+'''
+
+'''
+, 레시피결과를 친구에게 추천
 '''
 
 @app.route('/RecommendRecipe',methods=['POST'])
@@ -437,6 +554,41 @@ def RecommendRecipe():
         return render_template('loginpage.html')
 
 
+'''
+    레시피 결과를 친구에게 추천해줄 때 친구 선택 
+'''
+
+@app.route('/SelectFriendForRecipe',methods=['POST'])
+def SelectFriend():
+    global current_user
+    if (current_user==None):
+        return render_template('login.html')
+    else:
+
+
+        title = request.form['title']
+        imageUrl = request.form['imageUrl']
+        url = request.form['url']
+
+        con = mysql.connect()
+        cur = con.cursor(pymysql.cursors.DictCursor)
+        cur.execute('INSERT INTO Recipe(title,imageUrl,url) values(%s,%s,%s)',(title,imageUrl,url))# 레시피 생성
+
+        cur.execute("SELECT * from Recipe order by recipeID desc limit 1")
+
+        last_recipe = cur.fetchall()
+        for r in last_recipe:
+            maxRecipeID = r['recipeID']
+
+        '''
+            친구 목록
+        '''
+
+        cur.execute("SELECT customer1ID,customer2ID from friend where (customer1ID like (%s) or customer2ID like (%s)) and status = 1 ",(current_user.getCustomerID(),current_user.getCustomerID()))
+        friend_lists = cur.fetchall()
+        con.commit()
+        con.close()
+        return render_template('SelectFriend.html',recipeID=maxRecipeID,friend_lists=friend_lists,current_user=current_user)
 
 
 '''
@@ -445,18 +597,33 @@ def RecommendRecipe():
 
 @app.route('/show/MyRecipe')
 def ShowMyRecipe():
-
     global current_user
     if (current_user ==None):
         return render_template('login.html')
     else:
         con = mysql.connect()
         cur = con.cursor(pymysql.cursors.DictCursor)
-        cur.execute('SELECT R.title,R.imageUrl,R.kind,R.url from RecipeList AS RL join Recipe R on RL.recipeID = R.recipeID where RL.customerID like (%s)',(current_user.getCustomerID()))
+        cur.execute('SELECT R.title as title,R.imageUrl as imageUrl,R.url as url from RecipeList AS RL join Recipe R on RL.recipeID = R.recipeID where RL.customerID like (%s)',(current_user.getCustomerID()))
         MyRecipes = cur.fetchall()
         con.close()
 
         return render_template('showMyRecipe.html',MyRecipes=MyRecipes)
+
+'''
+친구가 추천해준 레시피 보기
+'''
+
+@app.route('/show/RecommendedRecipe')
+def ShowRecommendedRecipe():
+    global current_user
+    if (current_user==None):
+        return render_template('login.html')
+    else:
+        con = mysql.connect()
+        cur = con.cursor(pymysql.cursors.DictCursor)
+        cur.execute('SELECT R.title as title,R.imageUrl as imageUrl,R.url as url from recommendedlist as RL join Recipe R on RL.recipeID = R.recipeID where RL.receiverID like (%s)',(current_user.getCustomerID()))
+        reco_recipes = cur.fetchall()
+        return render_template('showRecommendedRecipe.html',recipes=reco_recipes)
 
 
 '''
