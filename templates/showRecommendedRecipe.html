@@ -11,9 +11,14 @@
 <body>
 
 <div class="container">
+
+
+<h2> 친구가 추천 해준 목록입니다.</h2>
+
+    {% if recipes.__len__()==0: %}
+        <br> <h5>목록이 없습니다.</h5>
+    {% endif %}
 <div class="card-columns">
-
-
 
 {% for recipe in recipes: %}
 
@@ -21,7 +26,7 @@
   <div class="card">
       <a href="/recipe/{{recipe['url']}}"><img class="card-img-top" src="{{recipe['imageUrl']}}" alt="Card image cap"></a>
     <div class="card-block">
-      <h4 class="card-text">{{recipe['title']}}</h4>
+      <h4 class="card-text">{{recipe['title']}} <br> 보낸 사람: {{recipe['senderID']}}</h4>
 
 
     </div>

@@ -51,12 +51,13 @@
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">추천하기</button>	<br><br><p1>&nbsp {{friend['customer2ID']}}</p1><br><br>
             </form>
             {% elif friend['customer2ID'] == current_user.getCustomerID() %}
-                <img src="https://image.flaticon.com/icons/svg/181/181549.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-                <a href="{{url_for('selectRecipe',friendID = customer1ID)}}">친구에게 내 레시피 추천</a>	&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-            <form action="/FriendsDelete" method="POST">
-                <input type="hidden" name="friendID" value="{{customer1ID}}">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">친구 삭제</button>	<br><br><p1>&nbsp {{friend['customer1ID']}}</p1><br><br>
+            <img src="https://image.flaticon.com/icons/svg/181/181549.svg" style="width:50px; height:50px">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+            <form action="/RecommendRecipe" method="POST">
+                <input type="hidden" name="receiverID" value="{{friend['customer1ID']}}">
+                <input type="hidden" name="recipeID" value="{{recipeID}}">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">추천하기</button>	<br><br><p1>&nbsp {{friend['customer1ID']}}</p1><br><br>
             </form>
+
             {% endif %}
         {% endfor %}
     </div>

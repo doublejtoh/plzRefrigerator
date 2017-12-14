@@ -388,7 +388,7 @@ def SearchRecipe():
         # print(text)
         FirstPage_ResultNotfound = re.findall(r'에 대한 검색결과가 없습니다.', text, re.DOTALL)
         if (FirstPage_ResultNotfound.__len__() == 1):  # 첫페이지에서 검색 결과를 출력하지 않을 때
-            print('검색 결과가 없습니다.')
+            return '검색 결과가 없습니다.'
         else:  # 첫페이지에서 검색결과가 있을 때
 
             # *** 첫 페이지에서의 결과값들 ***********************
@@ -446,10 +446,12 @@ def showRecipeDetail(recipenum):
 
         # 이미지
         detail_image = re.findall(r'<img id="main_thumbs" src="(.+?)" alt="main thumb">', detail_text, re.DOTALL)
-
+        error = detail_url + " 을 통해 상세 재료 정보 혹은 조리 순서를 확인하세요."
         # print(detail_title, detail_image)
         if (all_ingredient.__len__() == 0):  # 재료를 format에 맞춰 쓰지 않은 게시물인 경우
-            print(detail_url + " 을 통해 상세 재료 정보 혹은 조리 순서를 확인하세요.")
+
+
+            return error
         else:  # 재료를 format에 맞춰 쓴 게시물 인경우
 
             ingredients_html = all_ingredient[0].strip()  # 재료관련 부분 크롤링하기 위한 부분 html . * ingredient = ingredient[0].strip 하면 \r \n 같은거 제거 안되네.
@@ -465,7 +467,8 @@ def showRecipeDetail(recipenum):
             all_orders = re.findall(r'<div id="stepdescr(.+?)" class="media-body">(.+?)</div>', detail_text,
                                     re.DOTALL)  # plus_tip 없는 조리 순서
             if all_orders.__len__() == 0:  # 조리 순서를 포맷에 맞지 않게 쓴 게시물인 경우
-                print(detail_url + " 을 통해 상세 조리 순서를 확인하세요.")
+
+                return error
             else:
                 cook_orders = []
                 for order in all_orders:  # 조리 순서를 포맷에 맞게 쓴 게시물 인경우
@@ -621,7 +624,7 @@ def ShowRecommendedRecipe():
     else:
         con = mysql.connect()
         cur = con.cursor(pymysql.cursors.DictCursor)
-        cur.execute('SELECT R.title as title,R.imageUrl as imageUrl,R.url as url from recommendedlist as RL join Recipe R on RL.recipeID = R.recipeID where RL.receiverID like (%s)',(current_user.getCustomerID()))
+        cur.execute('SELECT R.title as title,R.imageUrl as imageUrl,R.url as url,RL.senderID as senderID  from recommendedlist as RL join Recipe R on RL.recipeID = R.recipeID where RL.receiverID like (%s)',(current_user.getCustomerID()))
         reco_recipes = cur.fetchall()
         return render_template('showRecommendedRecipe.html',recipes=reco_recipes)
 

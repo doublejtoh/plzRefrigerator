@@ -11,8 +11,14 @@
 <body>
 
 <div class="container">
-<div class="card-columns">
+        <h2> 내 레시피 목록입니다.</h2>
 
+
+    {% if MyRecipes.__len__()==0: %}
+        <br><br> <h5>목록이 없습니다.</h5>
+    {% endif %}
+
+<div class="card-columns">
 
 
 {% for recipe in MyRecipes: %}
