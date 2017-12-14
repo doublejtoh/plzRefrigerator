@@ -8,6 +8,8 @@ border 1px solid: #000;
 }
 </style>
 <head>
+
+
 <!-- 합쳐지고 최소화된 최신 CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
@@ -43,6 +45,100 @@ border 1px solid: #000;
     <![endif]-->
 </head>
 	<body>
+
+<style>
+.navbar {
+    overflow: hidden;
+    background-color: #FA5882;
+    font-family: Arial;
+}
+
+.navbar a {
+    float: left;
+    font-size: 16px;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.dropdown {
+    float: left;
+    overflow: hidden;
+}
+
+.dropdown .dropbtn {
+    font-size: 16px;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 14px 16px;
+    background-color: inherit;
+}
+
+.navbar a:hover, .dropdown:hover .dropbtn {
+    background-color: red;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #F5A9BC;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    float: none;
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content a:hover {
+    background-color: #F5A9BC;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.button1 {
+    background-color: #F5A9BC;
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 5px 6px;
+    border-radius:8px;
+}
+</style>
+
+
+<div class="navbar">
+  <a href="/SearchRecipe/Index">레시피 검색</a>
+  <a href="/showIngre">냉장고 관리</a>
+  <a href="/Friends/Index">친구 관리</a>
+  <div class="dropdown">
+    <button class="dropbtn">계정 관리
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-content">
+      <a href="/show/MyRecipe">내 레시피 보기</a>
+      <a href="/show/RecommendedRecipe">친구 추천 레시피 보기</a>
+      <a href="/chpw">비밀번호 변경</a>
+    </div>
+  </div>
+  <div style="float:right; margin-top:10px; margin-right:20px;">
+   <a href="/logout"><button class="button button1">로그 아웃</button></a>
+  </div>
+</div>
 		<form method="POST" action="/SearchRecipe" >
 			<div id="wrapper">
 				<br><br><br><h3>현재 내 냉장고에 있는 재료들 입니다.</h3><br>

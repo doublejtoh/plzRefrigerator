@@ -47,14 +47,11 @@ current_user = None
 def login(isUserMatch=None):
     global current_user
     if (current_user!=None): # 이미 로그인 되어있는 경우
-        return render_template('loginpage.html')
+        return render_template('loginpage.html',current_user_name=current_user.getName())
     else:
         return render_template('login.html',isUserMatch=isUserMatch)
 # static, templates 폴더를 만들어서 html 코드를 작성해줘야한다.
 
-@app.route('/main')
-def main_menu():
-    return render_template('loginpage.html')
 
 '''
 로그인,회원가입,로그아웃,비밀번호 변경
@@ -88,7 +85,7 @@ def signupReq():
             global current_user
             current_user = CurrentUser(id,password,maxrefrigID,name)
 
-            return render_template('loginpage.html')
+            return render_template('loginpage.html',current_user_name=current_user.getName())
         else : # 이미 아이디가 DB에 존재한다면 회원가입불가.
 
 
@@ -113,7 +110,7 @@ def reqLogin(id=None,password=None):
             global current_user
             current_user = CurrentUser(customerID,customerPW,refrigID,name)
             con.close()
-            return render_template('loginpage.html',name=current_user.getName())
+            return render_template('loginpage.html',current_user_name=current_user.getName())
 
         # db에 있는 값과 비교하여 일치하지 않으면 return값 0으로 줌.
         else:
@@ -123,6 +120,14 @@ def reqLogin(id=None,password=None):
             con.close()
             return render_template('login.html', isUserMatch=isUserMatch)
 
+@app.route('/chpw')
+def chpw():
+    global current_user
+
+    if(current_user ==None):
+        return render_template('login.html')
+    else:
+        return render_template('changePW.html')
 
 @app.route('/changePW',methods=['POST'])
 def changePW():
@@ -130,6 +135,7 @@ def changePW():
     if (current_user==None): # 로그인이 안되어 있을 경우
         return render_template('login.html')# redirect to index(login page).
     else:# 로그인이 되어 있을 경우
+
         new_pw = request.form['password']
 
         current_user.setCustomerPW(new_pw)
@@ -276,7 +282,7 @@ def FriendsAddReq():
         else:
             con = mysql.connect()
             cur = con.cursor(pymysql.cursors.DictCursor)
-            cur.execute("SELECT * from friend where (customer1ID in (%s,%s) or customer2ID in (%s,%s)) and status = 1",(current_user.getCustomerID(),customer2ID,current_user.getCustomerID(),customer2ID)) # 이미 친구로 등록되어있는데, 친구 신청 요청자와 받은자가 달라질 뿐 인데 친구 신청했을 경우에 대한 예외 처리
+            cur.execute("SELECT * from friend where (customer1ID in (%s,%s) and customer2ID in (%s,%s)) and status = 1",(current_user.getCustomerID(),customer2ID,current_user.getCustomerID(),customer2ID)) # 이미 친구로 등록되어있는데, 친구 신청 요청자와 받은자가 달라질 뿐 인데 친구 신청했을 경우에 대한 예외 처리
             datas = cur.fetchall()
             if datas.__len__()==0:
                 cur.execute("INSERT INTO friend(customer1ID,customer2ID,status) values(%s,%s,%s)",(current_user.getCustomerID(),customer2ID,2))  # customer1ID에는 친구 신청자 ID가 들어가고 customer2ID에는 친구의 ID가 들어간다.
@@ -554,7 +560,7 @@ def RecommendRecipe():
         cur.execute('INSERT INTO RecommendedList(senderID,receiverID,recipeID) values(%s,%s,%s)',(current_user.getCustomerID(),receiverID,recipeID))
         con.commit()
         con.close()
-        return render_template('loginpage.html')
+        return render_template('loginpage.html',current_user_name=current_user.getName())
 
 
 '''

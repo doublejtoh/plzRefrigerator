@@ -1,77 +1,105 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> <html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"> <meta http-equiv="Content-Type" Content="text/html; charset=utf-8" />
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <!-- 합쳐지고 최소화된 최신 CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+﻿
 
-<!-- 부가적인 테마 -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+        <!DOCTYPE html>
+<html>
+<head>
+<!-- 헤드 다 복사 붙여넣기 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+.navbar {
+    overflow: hidden;
+    background-color: #FA5882;
+    font-family: Arial;
+}
 
-<!-- 합쳐지고 최소화된 최신 자바스크립트 -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="../../../../favicon.ico">
+.navbar a {
+    float: left;
+    font-size: 16px;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
 
-    <title>Justified Nav Template for Bootstrap</title>
+.dropdown {
+    float: left;
+    overflow: hidden;
+}
 
-    <!-- Bootstrap core CSS -->
-    <link href="../../../../dist/css/bootstrap.min.css" rel="stylesheet">
+.dropdown .dropbtn {
+    font-size: 16px;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 14px 16px;
+    background-color: inherit;
+}
 
-    <!-- Custom styles for this template -->
-    <link href="justified-nav.css" rel="stylesheet">
-  </head>
+.navbar a:hover, .dropdown:hover .dropbtn {
+    background-color: red;
+}
 
-  <body>
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #F5A9BC;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
 
-    <div class="container">
+.dropdown-content a {
+    float: none;
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
 
-      <header class="masthead">
-        <h3 class="text-muted"></h3>
-	<br><br><br><br><br><br><br>
-        <nav class="navbar navbar-expand-md navbar-light bg-light rounded mb-3">
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav text-md-center nav-justified w-100">
-              <li class="nav-item active">
-                <a class="nav-link" href="/SearchRecipe/Index">레시피 검색<span class="sr-only">(current)</span></a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/showIngre">냉장고 관리</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/Friends/Index">친구 관리</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">계정 관리</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/show/MyRecipe">내 레시피 보기</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/show/RecommendedRecipe">친구가 추천해준 레시피 보기</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/logout">로그아웃</a>
-              </li>
-            </ul>
-          </div>
-        </nav>
-      </header>
+.dropdown-content a:hover {
+    background-color: #F5A9BC;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.button1 {
+    background-color: #F5A9BC;
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 5px 6px;
+    border-radius:8px;
+}
+</style>
+</head>
+<body>
+<!-- 상단바 코드-->
+<div class="navbar">
+  <a href="/SearchRecipe/Index">레시피 검색</a>
+  <a href="/showIngre">냉장고 관리</a>
+  <a href="/Friends/Index">친구 관리</a>
+  <div class="dropdown">
+    <button class="dropbtn">계정 관리
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-content">
+      <a href="/show/MyRecipe">내 레시피 보기</a>
+      <a href="/show/RecommendedRecipe">친구 추천 레시피 보기</a>
+      <a href="/chpw">비밀번호 변경</a>
+    </div>
+  </div>
+  <div style="float:right; margin-top:10px; margin-right:20px;">
+
+   <a href="/logout"><button class="button button1">{{current_user_name}}님 로그 아웃</button></a>
+  </div>
+</div>
+
+</body>
+</html>
