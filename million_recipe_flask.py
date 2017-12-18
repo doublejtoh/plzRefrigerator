@@ -189,7 +189,7 @@ def addIngre():
         ingre_name = request.form['ingre_name']
         con = mysql.connect()
         cur = con.cursor()
-        cur.execute("SELECT * from Refriingre where name Like (%s)", (ingre_name))
+        cur.execute("SELECT * from Refriingre where name Like (%s) and refrigID = (%s)", (ingre_name,current_user.getrefrigID()))
         datas = cur.fetchall()
         if(datas.__len__() == 0):
             cur.execute("INSERT INTO Refriingre(refrigID,quantity,name) VALUES (%s,%s,%s)",(current_user.getrefrigID(),ingre_quantity,ingre_name))
